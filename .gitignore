@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Virtualenv / local env
+.venv/
+.env
+
+# Test artifacts
+.coverage
+htmlcov/
+.pytest_cache/
+.hypothesis/
+
+# Editor
+.vscode/
+
+# Large logs / local data
+*.log
+!sample.log
+!tampered.log
+
+# Local generated outputs
+.tmp_*
+report.json
+tamper_report.json
+verify_report.json
+*_report.json
+
+# UI/API are intentionally not published
+Evidence Protector Web UI/
+evidence_protector_api.py
+start-backend.bat
+start-backend.sh

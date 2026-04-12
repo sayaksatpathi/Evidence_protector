@@ -1,0 +1,8 @@
+click
+rich
+python-dateutil
+
+# Test / quality
+pytest
+hypothesis
+coverage

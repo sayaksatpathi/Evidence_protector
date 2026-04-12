@@ -1,0 +1,9 @@
+2026-01-15T14:23:01Z INFO Start of log (ISO8601)
+2026-01-15T14:24:01Z INFO Normal activity
+# This line has no timestamp and should be counted as malformed
+[15/Jan/2026:14:25:30 +0000] "GET /index.html HTTP/1.1" 200 1024
+Jan 15 14:26:30 host process[123]: Syslog-style entry
+2026-01-15 14:31:31 INFO Five-minute gap ends here
+2026-01-15 14:31:40 INFO Short gap (below threshold)
+2026-01-15 14:30:40 INFO TIMESTAMP_ANOMALY goes backwards in time
+ATTACKER_INSERTED_LINE

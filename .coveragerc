@@ -1,0 +1,7 @@
+[run]
+source = evidence_protector
+omit = test_*
+
+[report]
+show_missing = true
+fail_under = 85
