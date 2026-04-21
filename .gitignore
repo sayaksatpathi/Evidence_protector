@@ -15,6 +15,8 @@ downloads/
 eggs/
 .eggs/
 lib/
+!Evidence Protector Web UI/src/app/lib/
+!Evidence Protector Web UI/src/app/lib/**
 lib64/
 parts/
 sdist/
