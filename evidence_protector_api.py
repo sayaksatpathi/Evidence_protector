@@ -577,6 +577,15 @@ async def security_middleware(request: Request, call_next: Callable[[Request], A
 
     client = _client_host(request)
     start = time.monotonic()
+    public_paths = {
+        "/api/health",
+        "/api/health/live",
+        "/api/health/ready",
+        "/api/docs",
+        "/api/openapi.json",
+        "/api/redoc",
+    }
+    is_public = path in public_paths
 
     # Enforce content-type contract for upload-style POST endpoints.
     if request.method.upper() == "POST" and path in _MULTIPART_POST_PATHS:
@@ -590,7 +599,7 @@ async def security_middleware(request: Request, call_next: Callable[[Request], A
             )
 
     provided = request.headers.get("X-API-Key", "")
-    if API_ROLE_BY_KEY or API_KEY:
+    if (API_ROLE_BY_KEY or API_KEY) and not is_public:
         if not (ALLOW_LOCALHOST_WITHOUT_KEY and client in LOCALHOSTS):
             role = ""
             if API_ROLE_BY_KEY:
