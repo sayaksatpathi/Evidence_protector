@@ -1,60 +1,183 @@
-# Python
+# === Python & Dependencies ===
 __pycache__/
 *.py[cod]
-*.egg-info/
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv*/
 build/
+develop-eggs/
 dist/
-
-# Virtualenv / local env
-.venv/
-.env
-.env.*
-!.env.example
-
-# Secrets / credentials (never commit)
-secrets/
-*.pem
-*.key
-*.p12
-*.pfx
-*.crt
-*.csr
-id_rsa*
-id_ed25519*
-*api_key*
-*apikey*
-*access_key*
-*secret_key*
-*token*
-credentials.json
-auth.json
-
-# Test artifacts
-.coverage
-htmlcov/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 .pytest_cache/
 .hypothesis/
+.coverage
+.coverage.*
+.cache/
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
 
-# Editor
+# === Node.js & Frontend ===
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+dist/
+build/
+.env.local
+.env.*.local
+
+# === IDE & Editor ===
 .vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.vs/
+.vscode-server/
+*.sublime-project
+*.sublime-workspace
 
-# Large logs / local data
+# === Secrets & Credentials (CRITICAL) ===
+# Environment variables
+.env
+.env.*.local
+.env.production.local
+.env.development.local
+.env.test.local
+!.env.example
+!.env.backend.example
+!.env.frontend.example
+
+# Cryptographic keys
+*.pem
+*.key
+*.pub
+*.crt
+*.cert
+*.jks
+*.p12
+*.p8
+id_rsa*
+id_dsa*
+id_ecdsa*
+id_ed25519*
+*.private.key
+*.private.pem
+
+# Credentials & tokens
+credentials.json
+auth.json
+secrets.json
+config.secrets.json
+*api_key*
+*API_KEY*
+*api_secret*
+*API_SECRET*
+*token*
+*TOKEN*
+*password*
+*PASSWORD*
+*secret*
+*SECRET*
+*.jwt
+.aws/credentials
+.aws/config
+
+# Security artifacts
+*.keystore
+*.truststore
+oauth_token
+refresh_token
+access_token
+
+# === Database & Backend Services ===
+*.db
+*.sqlite
+*.sqlite3
+*.sql
+data/
+logs/
 *.log
-!sample.log
-!tampered.log
+access.log
+error.log
 
-# Local generated outputs
-.tmp_*
-report.json
-tamper_report.json
-verify_report.json
-*_report.json
-*.manifest.json
-*.zip
+# === Docker & Deployment ===
+.docker/
+docker-compose.override.yml
+docker-compose.prod.yml
+
+# === Artifacts & Temp Files ===
 artifacts/
+temp/
+tmp/
+*.tmp
+*.bak
+*.backup
+.tmp_*
 
-# UI/API are intentionally not published
-Evidence Protector Web UI/
-evidence_protector_api.py
-start-backend.bat
-start-backend.sh
+# === Test Artifacts ===
+test_results/
+coverage_report/
+test_coverage/
+
+# === Git Temp ===
+.git/objects/tmp_*
+.gitkeep
+
+# === Monorepo & Workspace ===
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# === Generated Files ===
+dist/
+build/
+coverage/
+.nyc_output/
+
+# === System ===
+Thumbs.db
+.DS_Store
+.AppleDouble
+.LSOverride
+*.bak
+*.swp
+*~
+
+# === Sensitive Application Data ===
+certificates/
+keys/
+tokens/
+sessions/
+.firebase/
+.amplify/
