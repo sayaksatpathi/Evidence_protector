@@ -8,6 +8,26 @@ dist/
 # Virtualenv / local env
 .venv/
 .env
+.env.*
+!.env.example
+
+# Secrets / credentials (never commit)
+secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.csr
+id_rsa*
+id_ed25519*
+*api_key*
+*apikey*
+*access_key*
+*secret_key*
+*token*
+credentials.json
+auth.json
 
 # Test artifacts
 .coverage
@@ -29,6 +49,9 @@ report.json
 tamper_report.json
 verify_report.json
 *_report.json
+*.manifest.json
+*.zip
+artifacts/
 
 # UI/API are intentionally not published
 Evidence Protector Web UI/
