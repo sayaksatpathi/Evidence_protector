@@ -1,0 +1,59 @@
+{
+  "manifest_version": 1,
+  "created_at": "2026-04-20T17:41:24.409055+00:00",
+  "source_dir": "artifacts/release-evidence",
+  "bundle_file": "release-evidence-bundle.zip",
+  "bundle_sha256": "5dbfa1b8c01cd71c877f2993e756f6aef824edb10aedc4d4da7887bb9a137e90",
+  "files": [
+    {
+      "path": "release-evidence-checklist.md",
+      "bytes": 962,
+      "sha256": "3320a748fdf86780522f8c28040e6fb9b3877e58beae0cd2db133e8ced12a68d"
+    },
+    {
+      "path": "release-evidence-manifest.json",
+      "bytes": 1744,
+      "sha256": "93ea91993f30e4400a84d258ef3a0a2f37e5ddc6c89177a148157bb6f9beebc5"
+    },
+    {
+      "path": "screenshots/baselines.png",
+      "bytes": 166846,
+      "sha256": "993704e9451a9d42d9b7b9e1c099e26c963fa03bb938f7e6e9640e4e69cf5908"
+    },
+    {
+      "path": "screenshots/compare.png",
+      "bytes": 166822,
+      "sha256": "c40346302e275adfc500e64f5620b2005ee211e91f4f22dd3d4b7a434556414e"
+    },
+    {
+      "path": "screenshots/dashboard.png",
+      "bytes": 166720,
+      "sha256": "3b73db0f62b8c14cdcb481ae1fed5a0f59dd43e12b04760969f7c7b55f009481"
+    },
+    {
+      "path": "screenshots/guide.png",
+      "bytes": 166884,
+      "sha256": "efc48249cf7e95c0f05d420d810263c5c3b1339b89b7a07f6407f0a4adb2de6b"
+    },
+    {
+      "path": "screenshots/history.png",
+      "bytes": 166860,
+      "sha256": "4201fb31f49cb5981587d2f74a7fba91f25409f3437d1c0ad2d181a7a1c5f7a8"
+    },
+    {
+      "path": "screenshots/latest-report.png",
+      "bytes": 166805,
+      "sha256": "c99126c32032131e435ce767ae1a76028339ad513e5f62987f526d6cca0bd22f"
+    },
+    {
+      "path": "screenshots/release-evidence.png",
+      "bytes": 166853,
+      "sha256": "b8585e2f89ad604b65a3eb0460101dc4826d96f5acf4fddbc37bba577ab041b7"
+    }
+  ],
+  "signature": {
+    "scheme": "ed25519",
+    "key_id": "af32606ef3a4ef6d",
+    "value": "4lmZuElFyNw9pPpj1e0PCxBkJnQ74GqrI8RsiT0ZZC6QpThAKnXLZRs/nDjUcHzH4vVD0KkhuEojd7TZrlIQCA=="
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "createdAt": "2026-04-20T16:52:29.206Z",
+  "baseUrl": "http://127.0.0.1:8080",
+  "outDir": "/home/sayak/Downloads/DEVOPIA1  3.0 (2)/DEVOPIA1  3.0/artifacts/release-evidence",
+  "screenshots": [
+    {
+      "name": "dashboard",
+      "route": "/",
+      "file": "screenshots/dashboard.png",
+      "sha256": "3b73db0f62b8c14cdcb481ae1fed5a0f59dd43e12b04760969f7c7b55f009481",
+      "bytes": 166720
+    },
+    {
+      "name": "history",
+      "route": "/history",
+      "file": "screenshots/history.png",
+      "sha256": "4201fb31f49cb5981587d2f74a7fba91f25409f3437d1c0ad2d181a7a1c5f7a8",
+      "bytes": 166860
+    },
+    {
+      "name": "latest-report",
+      "route": "/results/auto-ghost-analyze-1",
+      "file": "screenshots/latest-report.png",
+      "sha256": "c99126c32032131e435ce767ae1a76028339ad513e5f62987f526d6cca0bd22f",
+      "bytes": 166805
+    },
+    {
+      "name": "baselines",
+      "route": "/baselines",
+      "file": "screenshots/baselines.png",
+      "sha256": "993704e9451a9d42d9b7b9e1c099e26c963fa03bb938f7e6e9640e4e69cf5908",
+      "bytes": 166846
+    },
+    {
+      "name": "compare",
+      "route": "/compare",
+      "file": "screenshots/compare.png",
+      "sha256": "c40346302e275adfc500e64f5620b2005ee211e91f4f22dd3d4b7a434556414e",
+      "bytes": 166822
+    },
+    {
+      "name": "guide",
+      "route": "/guide",
+      "file": "screenshots/guide.png",
+      "sha256": "efc48249cf7e95c0f05d420d810263c5c3b1339b89b7a07f6407f0a4adb2de6b",
+      "bytes": 166884
+    },
+    {
+      "name": "release-evidence",
+      "route": "/release-evidence",
+      "file": "screenshots/release-evidence.png",
+      "sha256": "b8585e2f89ad604b65a3eb0460101dc4826d96f5acf4fddbc37bba577ab041b7",
+      "bytes": 166853
+    }
+  ]
+}

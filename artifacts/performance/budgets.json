@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "description": "Performance budgets for replay benchmark summary p95 latency metrics.",
+  "budgets_ms": {
+    "scan_ms": 200,
+    "sign_ms": 500,
+    "verify_ms": 500,
+    "ghost_analyze_ms": 1200,
+    "pipeline_total_ms": 2200
+  }
+}

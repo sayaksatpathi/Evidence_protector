@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "generated_at": "2026-04-21T02:52:01.530000+00:00",
+  "file": "sample.log",
+  "config": {
+    "iterations": 3,
+    "warmup": 1,
+    "gap": 300
+  },
+  "runs": [
+    {
+      "scan_ms": 0.468938,
+      "sign_ms": 1.725677,
+      "verify_ms": 1.717516,
+      "ghost_analyze_ms": 0.783264,
+      "pipeline_total_ms": 4.695,
+      "iteration": 1.0
+    },
+    {
+      "scan_ms": 0.401155,
+      "sign_ms": 1.1846,
+      "verify_ms": 1.100174,
+      "ghost_analyze_ms": 1.001465,
+      "pipeline_total_ms": 3.687,
+      "iteration": 2.0
+    },
+    {
+      "scan_ms": 0.411033,
+      "sign_ms": 1.278877,
+      "verify_ms": 0.975873,
+      "ghost_analyze_ms": 0.746833,
+      "pipeline_total_ms": 3.413,
+      "iteration": 3.0
+    }
+  ],
+  "summary": {
+    "scan_ms": {
+      "count": 3,
+      "avg_ms": 0.427,
+      "min_ms": 0.401,
+      "max_ms": 0.469,
+      "p50_ms": 0.411,
+      "p95_ms": 0.469
+    },
+    "sign_ms": {
+      "count": 3,
+      "avg_ms": 1.396,
+      "min_ms": 1.185,
+      "max_ms": 1.726,
+      "p50_ms": 1.279,
+      "p95_ms": 1.726
+    },
+    "verify_ms": {
+      "count": 3,
+      "avg_ms": 1.265,
+      "min_ms": 0.976,
+      "max_ms": 1.718,
+      "p50_ms": 1.1,
+      "p95_ms": 1.718
+    },
+    "ghost_analyze_ms": {
+      "count": 3,
+      "avg_ms": 0.844,
+      "min_ms": 0.747,
+      "max_ms": 1.001,
+      "p50_ms": 0.783,
+      "p95_ms": 1.001
+    },
+    "pipeline_total_ms": {
+      "count": 3,
+      "avg_ms": 3.932,
+      "min_ms": 3.413,
+      "max_ms": 4.695,
+      "p50_ms": 3.687,
+      "p95_ms": 4.695
+    }
+  }
+}

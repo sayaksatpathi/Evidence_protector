@@ -1,0 +1,392 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  python:
+    name: Python tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: |
+          pytest -q
+
+  performance-budget:
+    name: Performance budget alarms
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run replay benchmark
+        run: |
+          python ./scripts/replay_benchmark.py \
+            --file ./sample.log \
+            --warmup 1 \
+            --iterations 5 \
+            --out ./artifacts/performance/replay-benchmark.json
+
+      - name: Check budgets (fail on violation)
+        run: |
+          python ./scripts/check_performance_budget.py \
+            --report ./artifacts/performance/replay-benchmark.json \
+            --budget ./artifacts/performance/budgets.json
+
+      - name: Upload performance artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-benchmark
+          path: artifacts/performance/*.json
+          if-no-files-found: error
+
+  ui:
+    name: Web UI build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Evidence Protector Web UI
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+  docker:
+    name: Docker build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: |
+          docker build -t evidence-protector-backend .
+
+      - name: Build Web UI image
+        run: |
+          docker build -t evidence-protector-web "Evidence Protector Web UI"
+
+  image-vuln-scan:
+    name: Image vulnerability scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: |
+          docker build -t evidence-protector-backend .
+
+      - name: Build Web UI image
+        run: |
+          docker build -t evidence-protector-web "Evidence Protector Web UI"
+
+      - name: Scan backend image (high/critical)
+        run: |
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy:0.53.0 image \
+            --severity HIGH,CRITICAL \
+            --ignore-unfixed \
+            --vuln-type os,library \
+            --exit-code 1 \
+            evidence-protector-backend
+
+      - name: Scan Web UI image (high/critical)
+        run: |
+          docker run --rm \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            aquasec/trivy:0.53.0 image \
+            --severity HIGH,CRITICAL \
+            --ignore-unfixed \
+            --vuln-type os,library \
+            --exit-code 1 \
+            evidence-protector-web
+
+  compose-smoke:
+    name: Docker Compose smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compose up
+        run: |
+          docker compose up --build -d
+
+      - name: Wait for backend + proxy health
+        run: |
+          set -e
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8000/api/health >/dev/null; then
+              echo "backend ok"
+              break
+            fi
+            sleep 2
+          done
+
+          for i in $(seq 1 60); do
+            if curl -fsS http://localhost:8080/api/health >/dev/null; then
+              echo "proxy ok"
+              break
+            fi
+            sleep 2
+          done
+
+          backend_json="$(curl -fsS http://localhost:8000/api/health)"
+          proxy_json="$(curl -fsS http://localhost:8080/api/health)"
+
+          python - "$backend_json" "$proxy_json" <<'PY'
+          import json
+          import sys
+
+          backend = json.loads(sys.argv[1])
+          proxy = json.loads(sys.argv[2])
+
+          assert backend.get("status") == "ok", f"backend health payload invalid: {backend}"
+          assert proxy.get("status") == "ok", f"proxy health payload invalid: {proxy}"
+
+          print("backend health payload:", backend)
+          print("proxy health payload:", proxy)
+          PY
+
+      - name: Compose logs (on failure)
+        if: failure()
+        run: |
+          docker compose ps
+          docker compose logs --no-color --tail 200 backend web
+
+      - name: Compose down
+        if: always()
+        run: |
+          docker compose down --volumes
+
+  python-audit:
+    name: Python dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install pip-audit
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-audit
+
+      - name: Audit requirements (fail on findings)
+        run: |
+          pip-audit -r requirements.txt
+
+  ui-audit:
+    name: UI dependency audit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Evidence Protector Web UI
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit dependencies (high+)
+        run: npm audit --audit-level=high
+
+  sbom:
+    name: SBOM generation checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate backend CycloneDX SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: artifacts/sbom/backend.cyclonedx.json
+
+      - name: Generate Web UI CycloneDX SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: ./Evidence Protector Web UI
+          format: cyclonedx-json
+          output-file: artifacts/sbom/web-ui.cyclonedx.json
+
+      - name: Validate SBOM payloads
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          files = [
+              Path("artifacts/sbom/backend.cyclonedx.json"),
+              Path("artifacts/sbom/web-ui.cyclonedx.json"),
+          ]
+
+          for file in files:
+              if not file.exists() or file.stat().st_size == 0:
+                  raise SystemExit(f"Missing or empty SBOM file: {file}")
+              data = json.loads(file.read_text(encoding="utf-8"))
+              bom_format = data.get("bomFormat")
+              if bom_format != "CycloneDX":
+                  raise SystemExit(f"Unexpected bomFormat in {file}: {bom_format!r}")
+              components = data.get("components")
+              if not isinstance(components, list) or not components:
+                  raise SystemExit(f"No components found in {file}")
+
+          print("SBOM validation passed for all artifacts.")
+          PY
+
+      - name: Upload SBOM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-cyclonedx
+          path: artifacts/sbom/*.json
+          if-no-files-found: error
+
+  release-evidence:
+    name: Release evidence capture
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Install Web UI dependencies
+        working-directory: Evidence Protector Web UI
+        run: npm ci
+
+      - name: Run automated release evidence capture
+        run: |
+          ./scripts/capture-release-evidence.sh
+
+      - name: Create signed release evidence bundle
+        run: |
+          python ./scripts/release_bundle.py create \
+            --source-dir ./artifacts/release-evidence \
+            --out-dir ./artifacts/release-evidence-bundle
+
+      - name: Verify signed release evidence bundle
+        run: |
+          python ./scripts/release_bundle.py verify \
+            --bundle ./artifacts/release-evidence-bundle/release-evidence-bundle.zip \
+            --manifest ./artifacts/release-evidence-bundle/release-evidence-bundle.manifest.json
+
+      - name: Upload release evidence artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-evidence
+          path: artifacts/release-evidence
+          if-no-files-found: error
+
+      - name: Upload signed release bundle artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-evidence-signed-bundle
+          path: artifacts/release-evidence-bundle
+          if-no-files-found: error
+
+      - name: Compose logs (on failure)
+        if: failure()
+        run: |
+          docker compose ps
+          docker compose logs --no-color --tail 200 backend web
+
+      - name: Compose down
+        if: always()
+        run: |
+          docker compose down --volumes
+
+  e2e-ui-flows:
+    name: UI E2E flows
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Web UI dependencies
+        working-directory: Evidence Protector Web UI
+        run: npm ci
+
+      - name: Install Playwright browser
+        working-directory: Evidence Protector Web UI
+        run: npx playwright install chromium
+
+      - name: Compose up
+        run: |
+          docker compose up --build -d
+
+      - name: Wait for backend + proxy health
+        run: |
+          set -e
+          for i in $(seq 1 90); do
+            if curl -fsS http://localhost:8000/api/health >/dev/null && curl -fsS http://localhost:8080/api/health >/dev/null; then
+              echo "stack healthy"
+              break
+            fi
+            sleep 2
+          done
+
+          curl -fsS http://localhost:8000/api/health >/dev/null
+          curl -fsS http://localhost:8080/api/health >/dev/null
+
+      - name: Run UI E2E flows
+        working-directory: Evidence Protector Web UI
+        run: npm run e2e:flows
+
+      - name: Compose logs (on failure)
+        if: failure()
+        run: |
+          docker compose ps
+          docker compose logs --no-color --tail 200 backend web
+
+      - name: Compose down
+        if: always()
+        run: |
+          docker compose down --volumes

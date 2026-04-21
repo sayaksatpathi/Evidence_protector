@@ -1,0 +1,20 @@
+{
+  "file": ".\\tampered.log",
+  "manifest": ".\\tampered.manifest.json",
+  "signed_at": "2026-04-11T09:12:06.173551+00:00",
+  "verified_at": "2026-04-11T09:27:26.121006+00:00",
+  "clean": false,
+  "issues_found": 1,
+  "issues": [
+    {
+      "line_number": 9,
+      "expected_chain_hash": "",
+      "actual_chain_hash": "d6664eff094392cbc2bd121a1184678d921308ebd10898cd23ca323622e32ff7",
+      "status": "INSERTED"
+    }
+  ],
+  "manifest_total_lines": 8,
+  "current_total_lines": 9,
+  "manifest_root_hash": "eebc919b43417b64e1076104bcb97a1582c0f091d85b185e418f6e42db970476",
+  "current_root_hash": "d6664eff094392cbc2bd121a1184678d921308ebd10898cd23ca323622e32ff7"
+}

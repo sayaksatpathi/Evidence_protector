@@ -1,0 +1,14 @@
+.git
+.venv
+__pycache__
+**/__pycache__
+.pytest_cache
+.hypothesis
+Evidence Protector Web UI/node_modules
+Evidence Protector Web UI/dist
+*.log
+.coverage
+
+# Generated artifacts / sample outputs
+report.json
+tamper_report.json
