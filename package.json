@@ -1,0 +1,10 @@
+{
+  "name": "evidence-protector-monorepo-host",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build:web": "npm --prefix \"Evidence Protector Web UI\" run build",
+    "dev:web": "npm --prefix \"Evidence Protector Web UI\" run dev",
+    "install:web": "npm --prefix \"Evidence Protector Web UI\" install"
+  }
+}
