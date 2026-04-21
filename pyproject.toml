@@ -10,12 +10,35 @@ readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
   "click>=8.0",
+  "cryptography>=42.0",
   "rich>=13.0",
   "python-dateutil>=2.8",
 ]
 
+[project.optional-dependencies]
+api = [
+  "fastapi>=0.110",
+  "uvicorn[standard]>=0.29",
+  "pydantic>=2.6",
+]
+packaging = [
+  "pyinstaller>=6.0",
+]
+dev = [
+  "pytest>=7.0",
+  "httpx>=0.27",
+  "hypothesis>=6.0",
+  "coverage>=7.0",
+  "ruff>=0.5.0",
+  "mypy>=1.10.0",
+  "types-python-dateutil",
+]
+
 [project.scripts]
-evidence_protector = "evidence_protector:main"
+evidence_protector = "evidence_protector.cli:main"
 
 [tool.setuptools]
-py-modules = ["evidence_protector"]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

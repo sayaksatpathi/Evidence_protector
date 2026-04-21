@@ -3,12 +3,14 @@ import json
 import os
 import tempfile
 import unittest
+import zipfile
 from contextlib import redirect_stderr, redirect_stdout
 from datetime import datetime, timezone
 import hashlib
 
 from hypothesis import given, settings
 from hypothesis import strategies as st
+from click.testing import CliRunner
 
 import evidence_protector
 from evidence_protector import (
@@ -21,6 +23,32 @@ from evidence_protector import (
 class TestExtractTimestamp(unittest.TestCase):
     def test_iso8601_timestamp(self) -> None:
         line = "2024-01-15T14:23:01Z INFO Start"
+        ts = extract_timestamp(line)
+        self.assertIsNotNone(ts)
+        assert ts is not None
+        self.assertEqual(ts.year, 2024)
+        self.assertEqual(ts.month, 1)
+        self.assertEqual(ts.day, 15)
+        self.assertEqual(ts.hour, 14)
+        self.assertEqual(ts.minute, 23)
+        self.assertEqual(ts.second, 1)
+        self.assertIsNotNone(ts.tzinfo)
+
+    def test_bracketed_iso8601_timestamp_without_space(self) -> None:
+        line = "[2024-01-15T14:23:01Z] INFO Start"
+        ts = extract_timestamp(line)
+        self.assertIsNotNone(ts)
+        assert ts is not None
+        self.assertEqual(ts.year, 2024)
+        self.assertEqual(ts.month, 1)
+        self.assertEqual(ts.day, 15)
+        self.assertEqual(ts.hour, 14)
+        self.assertEqual(ts.minute, 23)
+        self.assertEqual(ts.second, 1)
+        self.assertIsNotNone(ts.tzinfo)
+
+    def test_iso8601_timestamp_with_trailing_comma(self) -> None:
+        line = "2024-01-15T14:23:01Z, INFO Start"
         ts = extract_timestamp(line)
         self.assertIsNotNone(ts)
         assert ts is not None
@@ -194,6 +222,31 @@ class TestExtractTimestampFuzz(unittest.TestCase):
             from datetime import timezone
 
             assert result.tzinfo == timezone.utc
+
+
+class TestScanLogFuzz(unittest.TestCase):
+
+    @given(st.lists(st.text(), min_size=1, max_size=200), st.integers(min_value=0, max_value=86_400))
+    @settings(max_examples=120)
+    def test_scan_log_never_crashes_on_arbitrary_lines(self, lines, threshold):
+        fd, path = tempfile.mkstemp(suffix=".log", text=True)
+        os.close(fd)
+        try:
+            with open(path, "w", encoding="utf-8", errors="replace") as f:
+                for line in lines:
+                    f.write(str(line))
+                    if not str(line).endswith("\n"):
+                        f.write("\n")
+
+            gaps, stats = scan_log(path, gap_threshold=threshold)
+
+            self.assertIsInstance(gaps, list)
+            self.assertIsInstance(stats, dict)
+            self.assertGreaterEqual(int(stats.get("total_lines", 0)), 1)
+            self.assertGreaterEqual(int(stats.get("timestamps_found", 0)), 0)
+            self.assertGreaterEqual(int(stats.get("malformed_lines", 0)), 0)
+        finally:
+            os.remove(path)
 
 
 class TestReporters(unittest.TestCase):
@@ -529,6 +582,56 @@ class TestHashChainIntegrity(unittest.TestCase):
             if os.path.exists(report_path):
                 os.remove(report_path)
             os.remove(path)
+
+
+class TestGhostBundleCommand(unittest.TestCase):
+    def test_ghost_bundle_creates_zip_and_manifest(self) -> None:
+        runner = CliRunner()
+
+        with tempfile.TemporaryDirectory() as tmp:
+            report = os.path.join(tmp, "report.json")
+            receipts = os.path.join(tmp, "receipts.jsonl")
+            narrative = os.path.join(tmp, "narrative.md")
+            out_zip = os.path.join(tmp, "case-bundle.zip")
+
+            with open(report, "w", encoding="utf-8") as f:
+                json.dump({"summary": {"risk_score": 42}, "events": []}, f)
+                f.write("\n")
+            with open(receipts, "w", encoding="utf-8") as f:
+                f.write('{"kind":"FILE","data":{"size_bytes":123}}\n')
+            with open(narrative, "w", encoding="utf-8") as f:
+                f.write("# Narrative\n")
+
+            result = runner.invoke(
+                evidence_protector.main,
+                [
+                    "ghost",
+                    "bundle",
+                    "--out",
+                    out_zip,
+                    "--report",
+                    report,
+                    "--receipts",
+                    receipts,
+                    "--narrative",
+                    narrative,
+                ],
+            )
+
+            self.assertEqual(result.exit_code, 0, msg=result.output)
+            self.assertTrue(os.path.exists(out_zip))
+
+            with zipfile.ZipFile(out_zip, "r") as zf:
+                names = zf.namelist()
+                self.assertIn("bundle_manifest.json", names)
+
+                manifest = json.loads(zf.read("bundle_manifest.json").decode("utf-8"))
+                self.assertEqual(manifest["version"], 1)
+                self.assertGreaterEqual(len(manifest.get("artifacts", [])), 3)
+
+                archive_paths = {item.get("archive_path") for item in manifest.get("artifacts", [])}
+                self.assertTrue(any(str(p).endswith("report.json") for p in archive_paths))
+                self.assertTrue(any(str(p).endswith("receipts.jsonl") for p in archive_paths))
 
 
 if __name__ == "__main__":

@@ -1,8 +1,16 @@
 click
 rich
 python-dateutil
+cryptography
+
+# Backend API
+fastapi
+uvicorn[standard]
+pydantic
 
 # Test / quality
 pytest
+httpx
+python-multipart
 hypothesis
 coverage
