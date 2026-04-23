@@ -94,8 +94,8 @@ function isRemoteBrowserOrigin(): boolean {
 }
 
 export function getApiSettings(): ApiSettings {
-  const envBaseUrl = String((import.meta as any)?.env?.VITE_API_BASE_URL ?? '').trim();
-  const envApiKey = String((import.meta as any)?.env?.VITE_API_KEY ?? '').trim();
+  const envBaseUrl = String(import.meta.env.VITE_API_BASE_URL ?? '').trim();
+  const envApiKey = String(import.meta.env.VITE_API_KEY ?? '').trim();
 
   const storedBaseUrl = readLocalStorageString(STORAGE_KEY_API_BASE_URL);
   const storedApiKey = readLocalStorageString(STORAGE_KEY_API_KEY);
