@@ -2,5 +2,11 @@
   "version": 2,
   "buildCommand": "npm run build:web",
   "outputDirectory": "Evidence Protector Web UI/dist",
-  "installCommand": "npm run install:web"
+  "installCommand": "npm run install:web",
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://evidence-protector-9w9o.onrender.com/api/:path*"
+    }
+  ]
 }
