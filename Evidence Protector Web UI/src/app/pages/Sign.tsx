@@ -8,6 +8,7 @@ import { addHistoryRecord, formatTimestamp, newHistoryId, type HistoryStatus } f
 import {
   fetchApiJson,
   formatApiErrorMessage,
+  getApiUnavailableMessage,
   getApiHeaders,
   isApiOkWithMode,
   isHealthResponse,
@@ -139,7 +140,7 @@ export function Sign() {
 
     const apiOk = await checkApiHealth();
     if (!apiOk) {
-      setError('Backend API not reachable. Start the Python API on http://127.0.0.1:8000.');
+      setError(getApiUnavailableMessage());
       return;
     }
 
@@ -290,7 +291,7 @@ export function Sign() {
 
         {apiDown && (
           <div className="p-4 bg-destructive/10 border border-destructive/30 rounded text-destructive">
-            Backend API not reachable. Start the Python API on http://127.0.0.1:8000.
+            {getApiUnavailableMessage()}
           </div>
         )}
 

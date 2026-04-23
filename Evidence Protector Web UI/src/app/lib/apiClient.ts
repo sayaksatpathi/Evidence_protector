@@ -75,17 +75,55 @@ function writeLocalStorageString(key: string, value: string) {
   }
 }
 
+function isLocalHost(hostname: string): boolean {
+  const host = String(hostname || '').toLowerCase();
+  return host === 'localhost' || host === '127.0.0.1' || host === '::1';
+}
+
+function isLoopbackUrl(url: string): boolean {
+  try {
+    return isLocalHost(new URL(url).hostname);
+  } catch {
+    return false;
+  }
+}
+
+function isRemoteBrowserOrigin(): boolean {
+  if (typeof window === 'undefined') return false;
+  return !isLocalHost(window.location.hostname);
+}
+
 export function getApiSettings(): ApiSettings {
   const envBaseUrl = String((import.meta as any)?.env?.VITE_API_BASE_URL ?? '').trim();
   const envApiKey = String((import.meta as any)?.env?.VITE_API_KEY ?? '').trim();
 
   const storedBaseUrl = readLocalStorageString(STORAGE_KEY_API_BASE_URL);
   const storedApiKey = readLocalStorageString(STORAGE_KEY_API_KEY);
+  const preferredBaseUrl = storedBaseUrl || envBaseUrl;
+  const ignoreLoopback = isRemoteBrowserOrigin() && isLoopbackUrl(preferredBaseUrl);
+
+  if (ignoreLoopback && storedBaseUrl) {
+    writeLocalStorageString(STORAGE_KEY_API_BASE_URL, '');
+  }
 
   return {
-    baseUrl: storedBaseUrl || envBaseUrl,
+    baseUrl: ignoreLoopback ? envBaseUrl : preferredBaseUrl,
     apiKey: storedApiKey || envApiKey,
   };
+}
+
+export function getApiUnavailableMessage(): string {
+  const { baseUrl } = getApiSettings();
+
+  if (baseUrl) {
+    return `Backend API not reachable at ${baseUrl}. Check backend health and CORS.`;
+  }
+
+  if (isRemoteBrowserOrigin()) {
+    return 'Backend API not reachable. Configure VITE_API_BASE_URL in Vercel to your backend URL.';
+  }
+
+  return 'Backend API not reachable. Start the Python API on http://127.0.0.1:8000.';
 }
 
 export function setApiSettings(next: Partial<ApiSettings>) {
@@ -110,6 +148,10 @@ function hasScheme(value: string): boolean {
 function joinUrl(baseUrl: string, path: string): string {
   const b = baseUrl.replace(/\/+$/, '');
   const p = path.startsWith('/') ? path : `/${path}`;
+  if (b.endsWith('/api') && (p === '/api' || p.startsWith('/api/'))) {
+    const suffix = p.slice('/api'.length);
+    return `${b}${suffix}`;
+  }
   return `${b}${p}`;
 }
 

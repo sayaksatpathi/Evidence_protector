@@ -1,13 +1,10 @@
-runtime: python-3.13
-
 services:
   - type: web
     name: evidence-protector-backend
-    env: python
+    runtime: docker
     region: oregon
     plan: free
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "python evidence_protector_api.py"
+    dockerfilePath: ./Dockerfile.render
     
     envVars:
       - key: EVIDENCE_PROTECTOR_API_PORT
@@ -21,10 +18,9 @@ services:
       - key: DEBUG
         value: "false"
       - key: EVIDENCE_PROTECTOR_API_KEYS_JSON
-        scope: secret
+        sync: false
       - key: EVIDENCE_PROTECTOR_PRIVATE_KEY_PATH
         value: "/opt/render/project/src/.keys/private.key"
-        scope: secret
     
     disk:
       name: data
@@ -32,7 +28,4 @@ services:
       sizeGB: 1
 
     healthCheckPath: /api/health
-    healthCheckInterval: 30
-    timeoutSeconds: 30
     
-    dockerfile: Dockerfile.render

@@ -10,6 +10,7 @@ import {
   type ApiMode,
   fetchApiJson,
   formatApiErrorMessage,
+  getApiUnavailableMessage,
   getApiHeaders,
   isApiOkWithMode,
   isHealthResponse,
@@ -1546,7 +1547,7 @@ export function Scan() {
 
     const apiOk = await checkApiHealth();
     if (!apiOk) {
-      setTerminalOutput(['ERROR: Backend API not reachable. Start the Python API on http://127.0.0.1:8000.']);
+      setTerminalOutput([`ERROR: ${getApiUnavailableMessage()}`]);
       return;
     }
 
@@ -2056,7 +2057,7 @@ export function Scan() {
 
         {apiDown && (
           <div className="p-4 bg-destructive/10 border border-destructive/30 rounded text-destructive">
-            Backend API not reachable. Start the Python API on http://127.0.0.1:8000.
+            {getApiUnavailableMessage()}
           </div>
         )}
 

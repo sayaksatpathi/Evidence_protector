@@ -36,6 +36,7 @@ from typing import Any, Awaitable, Callable, Dict, Literal, Optional, cast
 import uuid
 
 from fastapi import FastAPI, File, Form, Header, Request, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 from pydantic import BaseModel, ConfigDict, Field
 from starlette.responses import Response
@@ -49,6 +50,20 @@ from evidence_protector.ghost_receipts import collect_receipts
 
 
 app = FastAPI(title="Evidence Protector API", version="1.0")
+
+_cors_raw = os.getenv("EVIDENCE_PROTECTOR_CORS_ORIGINS", "*").strip()
+if _cors_raw == "*":
+    _cors_origins = ["*"]
+else:
+    _cors_origins = [origin.strip() for origin in _cors_raw.split(",") if origin.strip()]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_cors_origins or ["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 logger = logging.getLogger("evidence_protector_api")
 
@@ -1851,4 +1866,6 @@ def get_job_status(request: Request, job_id: str) -> JobStatusResponse | JSONRes
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("evidence_protector_api:app", host="127.0.0.1", port=8000)
+    host = os.getenv("EVIDENCE_PROTECTOR_API_HOST", "0.0.0.0")
+    port = int(os.getenv("EVIDENCE_PROTECTOR_API_PORT", "8000"))
+    uvicorn.run("evidence_protector_api:app", host=host, port=port)
