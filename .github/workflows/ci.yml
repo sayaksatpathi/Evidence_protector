@@ -322,7 +322,7 @@ jobs:
 
       - name: Run automated release evidence capture
         run: |
-          ./scripts/capture-release-evidence.sh
+          bash ./scripts/capture-release-evidence.sh
 
       - name: Create signed release evidence bundle
         run: |

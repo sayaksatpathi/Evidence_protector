@@ -9,7 +9,9 @@ WORKDIR /app
 
 # pip needs git to resolve the pinned Log-Guardian dependency. Remove git
 # after installation so it is not included in the runtime image.
+# Refresh the digest-pinned Debian base image with current security patches.
 RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
     && apt-get install -y --no-install-recommends git \
     && rm -rf /var/lib/apt/lists/*
 
