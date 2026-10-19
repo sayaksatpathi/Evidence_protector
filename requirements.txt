@@ -1,16 +1,17 @@
-click
-rich
-python-dateutil
-cryptography
+# Canonical shared engine, pinned to an immutable Log-Guardian commit.
+evidence-protector @ https://github.com/sayaksatpathi/Log-Guardian/archive/61654c470803d607b6ef77447db8656e87b79826.zip
 
-# Backend API
+# Full-stack API runtime
 fastapi
 uvicorn[standard]
 pydantic
+python-multipart
 
-# Test / quality
+# Test / quality tooling
 pytest
 httpx
-python-multipart
 hypothesis
 coverage
+ruff
+mypy
+types-python-dateutil
