@@ -361,62 +361,6 @@ jobs:
         run: |
           docker compose down --volumes
 
-  ui-dependency-refresh-artifact:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/refactor/shared-core-from-log-guardian'
-    name: Prepare UI dependency refresh (temporary)
-    permissions:
-      contents: write
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install current UI lockfile
-        working-directory: Evidence Protector Web UI
-        run: npm ci
-
-      - name: Pin patched direct dependencies
-        working-directory: Evidence Protector Web UI
-        run: |
-          npm pkg set 'dependencies.react-router=7.18.4'
-          npm pkg set 'devDependencies.vite=6.4.3'
-          npm pkg set 'pnpm.overrides.vite=6.4.3'
-          npm install --no-fund --no-audit
-
-      - name: Update vulnerable transitive dependencies
-        working-directory: Evidence Protector Web UI
-        run: npm audit fix --force --no-fund
-
-      - name: Verify UI dependency audit
-        working-directory: Evidence Protector Web UI
-        run: npm audit --audit-level=high
-
-      - name: Upload refreshed manifests
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ui-dependency-refresh
-          path: |
-            Evidence Protector Web UI/package.json
-            Evidence Protector Web UI/package-lock.json
-          if-no-files-found: error
-
-      - name: Commit verified dependency update
-        if: success()
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -- "Evidence Protector Web UI/package.json" "Evidence Protector Web UI/package-lock.json"
-          if git diff --cached --quiet; then
-            echo "No dependency manifest changes to commit."
-          else
-            git commit -m "fix(ui): update vulnerable npm dependencies"
-            git push origin "HEAD:\${GITHUB_REF_NAME}"
-          fi
-
   e2e-ui-flows:
     name: UI E2E flows
     runs-on: ubuntu-latest
