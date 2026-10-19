@@ -1,12 +1,4 @@
-from pathlib import Path
-import sys
-
-
-ROOT = Path(__file__).resolve().parents[1]
-SRC = ROOT / "src"
-if str(SRC) not in sys.path:
-    sys.path.insert(0, str(SRC))
-
+"""PyInstaller entry point for the shared Log-Guardian CLI engine."""
 
 from evidence_protector.cli import main
 
