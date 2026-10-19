@@ -18,7 +18,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-\1
+          pip install -r requirements.txt
 
       - name: Verify the engine comes from the pinned dependency
         run: |
@@ -35,7 +35,8 @@ jobs:
           print(f"Using canonical engine: {engine_file}")
           PY
           test ! -d src/evidence_protector
-\2
+
+      - name: Run tests
         run: |
           pytest -q
 
