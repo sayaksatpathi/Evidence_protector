@@ -18,9 +18,24 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+\1
 
-      - name: Run tests
+      - name: Verify the engine comes from the pinned dependency
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import evidence_protector
+
+          repository = Path.cwd().resolve()
+          engine_file = Path(evidence_protector.__file__).resolve()
+          if repository == engine_file or repository in engine_file.parents:
+              raise SystemExit(
+                  f"Engine must come from the installed Log-Guardian dependency, not this repository: {engine_file}"
+              )
+          print(f"Using canonical engine: {engine_file}")
+          PY
+          test ! -d src/evidence_protector
+\2
         run: |
           pytest -q
 
