@@ -246,6 +246,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Prepare SBOM output directory
+        run: mkdir -p artifacts/sbom
+
       - name: Generate backend CycloneDX SBOM
         uses: anchore/sbom-action@v0
         with:
@@ -317,7 +320,7 @@ jobs:
 
       - name: Run automated release evidence capture
         run: |
-          ./scripts/capture-release-evidence.sh
+          bash ./scripts/capture-release-evidence.sh
 
       - name: Create signed release evidence bundle
         run: |
