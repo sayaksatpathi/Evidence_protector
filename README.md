@@ -51,7 +51,7 @@ Users only download and run the executable.
 ### Build Linux binary
 
 ```bash
-./scripts/build-standalone.sh
+bash ./scripts/build-standalone.sh
 ```
 
 Output:
@@ -209,13 +209,13 @@ Windows smoke test (recommended):
 Linux/macOS smoke test (recommended):
 
 ```bash
-./scripts/docker-smoke-test.sh --open-browser
+bash ./scripts/docker-smoke-test.sh --open-browser
 ```
 
 Stop stack (either script):
 
 ```bash
-./scripts/docker-smoke-test.sh --down
+bash ./scripts/docker-smoke-test.sh --down
 ```
 
 This script runs `docker compose up --build` (detached), waits for:
@@ -239,7 +239,7 @@ Results view supports downloading Ghost artifacts:
 Generate the release screenshot pack + manifest/checklist with one command:
 
 ```bash
-./scripts/capture-release-evidence.sh
+bash ./scripts/capture-release-evidence.sh
 ```
 
 Windows PowerShell:
