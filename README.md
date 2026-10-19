@@ -4,6 +4,20 @@ This tool scans log files for suspicious time gaps between entries and produces 
 It supports multiple timestamp formats, handles large files in a streaming fashion, and can output results
 in terminal, CSV, or JSON formats.
 
+## Project relationship
+
+This repository is the **full-stack distribution** of Evidence Protector: the standalone CLI, FastAPI backend, web UI, Docker Compose setup, and release-evidence tooling.
+
+The companion [Log-Guardian repository](https://github.com/sayaksatpathi/Log-Guardian) is the **CLI-first flagship/reference project** for the shared log-integrity and Ghost Protocol engine. Some Python engine modules are currently mirrored in both repositories rather than installed from a single shared package, so they need to stay in sync.
+
+**Maintenance rule**
+- Shared integrity and forensic-engine changes: implement in Log-Guardian first, then mirror the relevant changes here and run the CLI/API/UI integration tests.
+- Full-stack-specific changes (FastAPI, Web UI, Docker, release evidence, and packaging): maintain them in this repository.
+- Use Log-Guardian for the CLI-first forensic workflow; use this repository when you need the Web UI/API or full-stack deployment.
+
+**This repository is not deprecated or archived.** It remains the home for the Web UI/API and full-stack distribution.
+
+
 ## Ubuntu Terminal Quickstart (CLI-only)
 
 1) Install prerequisites:
