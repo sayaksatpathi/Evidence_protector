@@ -247,6 +247,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Create SBOM output directory
+        run: mkdir -p artifacts/sbom
+
       - name: Generate backend CycloneDX SBOM
         uses: anchore/sbom-action@v0
         with:
