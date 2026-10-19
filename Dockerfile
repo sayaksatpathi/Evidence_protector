@@ -1,6 +1,5 @@
-# Evidence Protector API container
-# Runs the FastAPI backend used by the Web UI.
-
+# Evidence Protector API container. Shared engine comes from the pinned
+# evidence-protector dependency declared in pyproject.toml.
 FROM python:3.13-slim@sha256:d168b8d9eb761f4d3fe305ebd04aeb7e7f2de0297cec5fb2f8f6403244621664
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -8,12 +7,22 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-COPY requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+# pip needs git to resolve the pinned Log-Guardian dependency. Remove git
+# after installation so it is not included in the runtime image.
+# Refresh the digest-pinned Debian base image with current security patches.
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
 
-COPY src ./src
+COPY pyproject.toml README.md ./
+COPY evidence_protector_api.py evidence_protector_legacy_stdlib.py main.py asgi.py app.py ./
+RUN pip install --no-cache-dir . \
+    && apt-get purge -y --auto-remove git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Preserve the legacy script entry point; it forwards to the installed core.
 COPY evidence_protector.py ./evidence_protector.py
-COPY evidence_protector_api.py ./evidence_protector_api.py
 
 EXPOSE 8000
 

@@ -56,6 +56,8 @@ source .venv/bin/activate  # Linux/macOS
 # or: .venv\Scripts\activate  # Windows
 
 # Install dependencies
+pip install -e .
+# Optional: install test and quality tools
 pip install -r requirements.txt
 
 # Configure environment
@@ -222,6 +224,8 @@ cat "Evidence Protector Web UI/.env.local"
 
 ```bash
 # Backend
+pip install -e .
+# Optional: install test and quality tools
 pip install -r requirements.txt --upgrade
 
 # Frontend

@@ -59,17 +59,24 @@ docker run \
 ### 4. Multi-Stage Builds (Smaller Images)
 
 ```dockerfile
-# Stage 1: Builder
-FROM python:3.13-slim as builder
-RUN pip install --user -r requirements.txt
+# Stage 1: Builder. Git is needed only to install the pinned shared core.
+FROM python:3.13-slim AS builder
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /app
+COPY pyproject.toml README.md ./
+COPY evidence_protector_api.py evidence_protector_legacy_stdlib.py main.py asgi.py app.py ./
+RUN pip install --prefix=/install .
 
-# Stage 2: Runtime (only what's needed)
+# Stage 2: Runtime (the core package is installed from Log-Guardian; do not copy src/)
 FROM python:3.13-slim
-COPY --from=builder /root/.local /root/.local
-COPY src/ /app/src/
-ENV PATH=/root/.local/bin:$PATH
-USER 1000:1000
-CMD ["python", "-m", "evidence_protector.cli"]
+WORKDIR /app
+COPY --from=builder /install /usr/local
+COPY evidence_protector.py /app/evidence_protector.py
+ENV PATH=/usr/local/bin:$PATH
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+USER appuser
+CMD ["python", "-m", "uvicorn", "evidence_protector_api:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
 ### 5. Security Scanning

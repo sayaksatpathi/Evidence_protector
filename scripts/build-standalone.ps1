@@ -11,8 +11,10 @@ $Python = Join-Path $BuildVenv 'Scripts/python.exe'
 & $Python -m pip install "$RootDir[packaging]"
 
 New-Item -ItemType Directory -Force -Path $DistDir | Out-Null
+$CoreSitePackages = & $Python -c "from importlib.metadata import distribution; print(distribution('evidence-protector').locate_file(''))"
 
 & (Join-Path $BuildVenv 'Scripts/pyinstaller.exe') `
+  --paths $CoreSitePackages `
   --onefile `
   --clean `
   --name evidence-protector `

@@ -12,7 +12,9 @@ python -m pip install --upgrade pip
 pip install "${ROOT_DIR}[packaging]"
 
 mkdir -p "${DIST_DIR}"
+CORE_SITE_PACKAGES="$("${BUILD_VENV}/bin/python" -c 'from importlib.metadata import distribution; print(distribution("evidence-protector").locate_file(""))')"
 pyinstaller \
+  --paths "${CORE_SITE_PACKAGES}" \
   --onefile \
   --clean \
   --name evidence-protector \
