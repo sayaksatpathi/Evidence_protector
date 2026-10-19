@@ -7,13 +7,15 @@ python evidence_protector.py ... invocation without copying the package source.
 
 from __future__ import annotations
 
+import importlib.util
+import sys
 from importlib.metadata import PackageNotFoundError, distribution
 from pathlib import Path
 
 
 if __name__ == "__main__":
-    # Importing by package name makes Python load this bridge once as the
-    # evidence_protector package, then forward to the installed CLI.
+    # Import the installed package by its canonical package name and invoke its
+    # CLI. The repository-local file is only the backwards-compatible launcher.
     from evidence_protector.cli import main
 
     main()
@@ -36,13 +38,18 @@ else:
             "evidence_protector/__init__.py."
         )
 
-    # Turn this module into a regular package backed by the installed core so
-    # both import evidence_protector and import evidence_protector.core resolve
-    # to the canonical implementation.
-    __path__ = [str(_package_dir)]  # type: ignore[name-defined]
-    if __spec__ is not None:
-        __spec__.origin = str(_initializer)
-        __spec__.submodule_search_locations = __path__
+    # Load the installed initializer as a genuine package. Executing __init__.py
+    # directly with exec() breaks relative imports; a package spec supplies the
+    # correct __package__, __path__, and submodule search locations.
+    _spec = importlib.util.spec_from_file_location(
+        __name__,
+        str(_initializer),
+        submodule_search_locations=[str(_package_dir)],
+    )
+    if _spec is None or _spec.loader is None:
+        raise ImportError("Unable to load the installed evidence-protector package")
 
-    __file__ = str(_initializer)
-    exec(compile(_initializer.read_bytes(), str(_initializer), "exec"), globals(), globals())
+    _package = importlib.util.module_from_spec(_spec)
+    sys.modules[__name__] = _package
+    _spec.loader.exec_module(_package)
+    globals().update(_package.__dict__)
