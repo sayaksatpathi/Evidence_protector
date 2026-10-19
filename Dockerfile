@@ -1,5 +1,5 @@
-# Evidence Protector API container
-# Runs the FastAPI backend used by the Web UI.
+# Evidence Protector API container.
+# The shared integrity/forensic engine is installed from the pinned Log-Guardian archive.
 
 FROM python:3.13-slim@sha256:d168b8d9eb761f4d3fe305ebd04aeb7e7f2de0297cec5fb2f8f6403244621664
 
@@ -8,10 +8,16 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
+# Apply security updates to the pinned base image before installing application packages.
+RUN apt-get update \
+    && apt-get upgrade -y --no-install-recommends \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY src ./src
+# This repository only supplies the API wrapper and compatibility launcher.
+# The engine package is supplied by the immutable dependency above.
 COPY evidence_protector.py ./evidence_protector.py
 COPY evidence_protector_api.py ./evidence_protector_api.py
 

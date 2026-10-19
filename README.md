@@ -6,17 +6,16 @@ in terminal, CSV, or JSON formats.
 
 ## Project relationship
 
-This repository is the **full-stack distribution** of Evidence Protector: the standalone CLI, FastAPI backend, web UI, Docker Compose setup, and release-evidence tooling.
+This repository is the **full-stack distribution** of Evidence Protector: the FastAPI backend, web UI, Docker Compose deployment, release-evidence tooling, and compatibility launchers.
 
-The companion [Log-Guardian repository](https://github.com/sayaksatpathi/Log-Guardian) is the **CLI-first flagship/reference project** for the shared log-integrity and Ghost Protocol engine. Some Python engine modules are currently mirrored in both repositories rather than installed from a single shared package, so they need to stay in sync.
+The shared Python engine and CLI come from [Log-Guardian](https://github.com/sayaksatpathi/Log-Guardian), pinned to [commit `61654c470803d607b6ef77447db8656e87b79826`](https://github.com/sayaksatpathi/Log-Guardian/commit/61654c470803d607b6ef77447db8656e87b79826). The engine source is **not copied into this repository**. This prevents core fixes from diverging between repositories.
 
 **Maintenance rule**
-- Shared integrity and forensic-engine changes: implement in Log-Guardian first, then mirror the relevant changes here and run the CLI/API/UI integration tests.
-- Full-stack-specific changes (FastAPI, Web UI, Docker, release evidence, and packaging): maintain them in this repository.
-- Use Log-Guardian for the CLI-first forensic workflow; use this repository when you need the Web UI/API or full-stack deployment.
+- Shared integrity and forensic-engine changes: make them in Log-Guardian first, then deliberately update the immutable commit pin in both `pyproject.toml` and `requirements.txt` here.
+- Full-stack-specific changes (FastAPI, Web UI, Docker deployment, release evidence, and packaging) belong here.
+- Use Log-Guardian directly for the CLI-first workflow; use this repository for the web/API distribution.
 
-**This repository is not deprecated or archived.** It remains the home for the Web UI/API and full-stack distribution.
-
+**This repository is not deprecated or archived.** Its full-stack interface remains separate, while the core engine has one source of truth.
 
 ## Ubuntu Terminal Quickstart (CLI-only)
 
@@ -52,7 +51,7 @@ Users only download and run the executable.
 ### Build Linux binary
 
 ```bash
-./scripts/build-standalone.sh
+bash ./scripts/build-standalone.sh
 ```
 
 Output:
@@ -210,13 +209,13 @@ Windows smoke test (recommended):
 Linux/macOS smoke test (recommended):
 
 ```bash
-./scripts/docker-smoke-test.sh --open-browser
+bash ./scripts/docker-smoke-test.sh --open-browser
 ```
 
 Stop stack (either script):
 
 ```bash
-./scripts/docker-smoke-test.sh --down
+bash ./scripts/docker-smoke-test.sh --down
 ```
 
 This script runs `docker compose up --build` (detached), waits for:
@@ -240,7 +239,7 @@ Results view supports downloading Ghost artifacts:
 Generate the release screenshot pack + manifest/checklist with one command:
 
 ```bash
-./scripts/capture-release-evidence.sh
+bash ./scripts/capture-release-evidence.sh
 ```
 
 Windows PowerShell:

@@ -1,96 +1,65 @@
-"""Evidence Protector compatibility module.
+"""Backward-compatible launcher for the engine maintained in Log-Guardian.
 
-The canonical implementation lives under `src/evidence_protector/` as a proper
-Python package.
-
-This top-level module exists to preserve backwards compatibility for:
-  - `import evidence_protector`
-  - `python evidence_protector.py ...`
-
-It dynamically loads the `src/` package under an internal module name and
-re-exports its public API.
+The actual `evidence_protector` package is installed from the pinned GitHub
+archive declared by this repository's pyproject.toml and requirements.txt.
+This shim avoids keeping a second copy of the engine source in this repository.
 """
 
 from __future__ import annotations
 
 import importlib.util
+import os
 import sys
 from pathlib import Path
-from typing import TYPE_CHECKING
 
 
-_REPO_ROOT = Path(__file__).resolve().parent
-_PKG_DIR = _REPO_ROOT / "src" / "evidence_protector"
+def _load_installed_engine():
+    """Load the installed engine package under its canonical import name."""
+    repository_root = Path(__file__).resolve().parent
+    package_init = None
 
-# Allow `import evidence_protector.<submodule>` even though this is a single-file
-# compatibility shim. When `__path__` is present, Python treats the module as a
-# package for submodule resolution.
-__path__ = [str(_PKG_DIR)]  # type: ignore[name-defined]
-if __spec__ is not None:
-  __spec__.submodule_search_locations = [str(_PKG_DIR)]  # type: ignore[assignment]
+    for entry in sys.path:
+        try:
+            base = Path(entry or os.curdir).resolve()
+        except (OSError, RuntimeError):
+            continue
+
+        # Never resolve this compatibility module back to itself.
+        if base == repository_root:
+            continue
+
+        candidate = base / "evidence_protector" / "__init__.py"
+        if candidate.is_file():
+            package_init = candidate.resolve()
+            break
+
+    if package_init is None:
+        raise ImportError(
+            "The shared Evidence Protector engine is not installed. "
+            "Install the project dependencies with "
+            "`python -m pip install -r requirements.txt`."
+        )
+
+    spec = importlib.util.spec_from_file_location(
+        "evidence_protector",
+        str(package_init),
+        submodule_search_locations=[str(package_init.parent)],
+    )
+    if spec is None or spec.loader is None:
+        raise ImportError(f"Unable to load the shared engine from {package_init}")
+
+    module = importlib.util.module_from_spec(spec)
+    sys.modules["evidence_protector"] = module
+    spec.loader.exec_module(module)
+    return module
 
 
-def _load_impl_package():
-  pkg_dir = _PKG_DIR
-  init_py = _PKG_DIR / "__init__.py"
-  if not init_py.exists():
-    raise ImportError("Expected src/evidence_protector/__init__.py to exist")
-
-  spec = importlib.util.spec_from_file_location(
-    "_evidence_protector_impl",
-    str(init_py),
-    submodule_search_locations=[str(pkg_dir)],
-  )
-  if spec is None or spec.loader is None:
-    raise ImportError("Unable to load Evidence Protector implementation package")
-
-  module = importlib.util.module_from_spec(spec)
-  sys.modules[spec.name] = module
-  spec.loader.exec_module(module)
-  return module
-
-
-_impl = _load_impl_package()
-
-
-if TYPE_CHECKING:
-  # Static type checkers can't follow the dynamic re-export below.
-  # Import the public surface here so `import evidence_protector as ep` gets
-  # correct symbols/types in editors.
-  from evidence_protector.core import (  # noqa: F401
-    SIGNATURE_SCHEME,
-    CheckpointEntry,
-    HashEntry,
-    SuspiciousGap,
-    TamperResult,
-    build_hash_chain,
-    compute_manifest_signature,
-    extract_timestamp,
-    fingerprint_phrase,
-    format_duration,
-    scan_log,
-    sign_log,
-    verify_log,
-    verify_manifest_signature,
-  )
-  from evidence_protector.ghost_protocol import (  # noqa: F401
-    GhostBaseline,
-    GhostConfig,
-    GhostEvent,
-    GhostReport,
-    analyze_log,
-    build_baseline,
-    load_baseline,
-    load_report,
-    save_baseline,
-    save_report,
-  )
-
-__all__ = list(getattr(_impl, "__all__", []))
-for name in __all__:
-  globals()[name] = getattr(_impl, name)
-
+_engine = _load_installed_engine()
 
 if __name__ == "__main__":
-  main()
-
+    _engine.main()
+else:
+    # Export the canonical package API for legacy imports. The entry in
+    # sys.modules is replaced with the canonical package, so submodules such
+    # as evidence_protector.core also resolve to the same module instances.
+    globals().update(_engine.__dict__)

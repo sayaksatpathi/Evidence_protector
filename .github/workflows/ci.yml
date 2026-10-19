@@ -20,6 +20,22 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Verify the engine comes from the pinned dependency
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import evidence_protector
+
+          repository = Path.cwd().resolve()
+          engine_file = Path(evidence_protector.__file__).resolve()
+          if repository == engine_file or repository in engine_file.parents:
+              raise SystemExit(
+                  f"Engine must come from the installed Log-Guardian dependency, not this repository: {engine_file}"
+              )
+          print(f"Using canonical engine: {engine_file}")
+          PY
+          test ! -d src/evidence_protector
+
       - name: Run tests
         run: |
           pytest -q
@@ -230,6 +246,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Prepare SBOM output directory
+        run: mkdir -p artifacts/sbom
+
       - name: Generate backend CycloneDX SBOM
         uses: anchore/sbom-action@v0
         with:
@@ -301,7 +320,7 @@ jobs:
 
       - name: Run automated release evidence capture
         run: |
-          ./scripts/capture-release-evidence.sh
+          bash ./scripts/capture-release-evidence.sh
 
       - name: Create signed release evidence bundle
         run: |
