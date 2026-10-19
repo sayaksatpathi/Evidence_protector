@@ -8,8 +8,7 @@ in terminal, CSV, or JSON formats.
 
 This repository is the **full-stack distribution** of Evidence Protector: the FastAPI backend, web UI, Docker Compose deployment, release-evidence tooling, and compatibility launchers.
 
-The shared Python engine and CLI come from [Log-Guardian](https://github.com/sayaksatpathi/Log-Guardian), pinned to [commit `61654c470803d607b6ef77447db8656e87b79826`](
-https://github.com/sayaksatpathi/Log-Guardian/commit/61654c470803d607b6ef77447db8656e87b79826). The engine source is **not copied into this repository**. This prevents core fixes from diverging between repositories.
+The shared Python engine and CLI come from [Log-Guardian](https://github.com/sayaksatpathi/Log-Guardian), pinned to [commit `61654c470803d607b6ef77447db8656e87b79826`](https://github.com/sayaksatpathi/Log-Guardian/commit/61654c470803d607b6ef77447db8656e87b79826). The engine source is **not copied into this repository**. This prevents core fixes from diverging between repositories.
 
 **Maintenance rule**
 - Shared integrity and forensic-engine changes: make them in Log-Guardian first, then deliberately update the immutable commit pin in both `pyproject.toml` and `requirements.txt` here.
