@@ -6,17 +6,16 @@ in terminal, CSV, or JSON formats.
 
 ## Project relationship
 
-This repository is the **full-stack distribution** of Evidence Protector: the standalone CLI, FastAPI backend, web UI, Docker Compose setup, and release-evidence tooling.
+This repository is the **full-stack distribution** of Evidence Protector: the FastAPI backend, Web UI, Docker deployment, and release-evidence tooling. It consumes the shared integrity/forensics engine and CLI from [Log-Guardian](https://github.com/sayaksatpathi/Log-Guardian), pinned to commit `61654c470803d607b6ef77447db8656e87b79826` in `pyproject.toml`.
 
-The companion [Log-Guardian repository](https://github.com/sayaksatpathi/Log-Guardian) is the **CLI-first flagship/reference project** for the shared log-integrity and Ghost Protocol engine. Some Python engine modules are currently mirrored in both repositories rather than installed from a single shared package, so they need to stay in sync.
+The shared `src/evidence_protector/` implementation is intentionally **not duplicated here**. Log-Guardian is the canonical source for the `evidence_protector` Python package; this repository contains only full-stack-specific code and a small backwards-compatibility shim.
 
 **Maintenance rule**
-- Shared integrity and forensic-engine changes: implement in Log-Guardian first, then mirror the relevant changes here and run the CLI/API/UI integration tests.
-- Full-stack-specific changes (FastAPI, Web UI, Docker, release evidence, and packaging): maintain them in this repository.
-- Use Log-Guardian for the CLI-first forensic workflow; use this repository when you need the Web UI/API or full-stack deployment.
+- Shared integrity, scanning, signing, verification, and Ghost Protocol changes: make them in Log-Guardian first.
+- To upgrade the shared engine, update the pinned commit in `pyproject.toml`, then run the Python tests, API tests, Web UI build, Docker/Compose smoke tests, and release-evidence checks.
+- FastAPI routes, Web UI, Docker deployment, and release-packaging changes belong in this repository.
 
-**This repository is not deprecated or archived.** It remains the home for the Web UI/API and full-stack distribution.
-
+Install the full-stack application with `python -m pip install -e .`. The shared CLI command `evidence_protector` is provided by the pinned Log-Guardian package.
 
 ## Ubuntu Terminal Quickstart (CLI-only)
 

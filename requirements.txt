@@ -1,3 +1,7 @@
+# Core integrity/forensics engine and CLI are declared in pyproject.toml.
+# Install the application with: python -m pip install -e .
+# This file supplies the test, audit, and developer-tool dependencies.
+
 click
 rich
 python-dateutil
@@ -7,10 +11,10 @@ cryptography
 fastapi
 uvicorn[standard]
 pydantic
+python-multipart
 
 # Test / quality
 pytest
 httpx
-python-multipart
 hypothesis
 coverage

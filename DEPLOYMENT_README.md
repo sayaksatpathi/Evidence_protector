@@ -41,6 +41,8 @@ source .venv/bin/activate  # Linux/macOS
 
 2. **Install dependencies**:
 ```bash
+pip install -e .
+# Optional: install test and quality tools
 pip install -r requirements.txt
 ```
 

@@ -1,23 +1,27 @@
-# Render-optimized Dockerfile for Evidence Protector Backend
+# Render-optimized Dockerfile for Evidence Protector Backend.
+# The core integrity/forensics engine is installed from the pinned
+# Log-Guardian dependency in pyproject.toml.
 
 FROM python:3.13-slim
 
 WORKDIR /app
 
-# Install system dependencies
+# The pinned shared-core dependency is installed from Git, so Git is needed
+# only during the build. Keep the compiler for any source-built wheel.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
+    git \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
 RUN useradd -m -u 1000 appuser
 
-# Copy requirements first (for better layer caching)
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy application code
+# Copy application and install its declared runtime dependencies.
 COPY . .
+RUN pip install --no-cache-dir . \
+    && apt-get purge -y --auto-remove git \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create directories for keys and logs
 RUN mkdir -p /app/src/.keys /app/logs && \
@@ -30,8 +34,6 @@ USER appuser
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health', timeout=5)" || exit 1
 
-# Expose port
 EXPOSE 8000
 
-# Run the application
 CMD ["python", "evidence_protector_api.py"]
