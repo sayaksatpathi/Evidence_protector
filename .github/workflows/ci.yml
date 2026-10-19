@@ -361,6 +361,42 @@ jobs:
         run: |
           docker compose down --volumes
 
+  ui-dependency-refresh-artifact:
+    name: Prepare UI dependency refresh artifact (temporary)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install current UI lockfile
+        working-directory: Evidence Protector Web UI
+        run: npm ci
+
+      - name: Pin patched direct dependencies
+        working-directory: Evidence Protector Web UI
+        run: |
+          npm pkg set 'dependencies.react-router=7.18.4'
+          npm pkg set 'devDependencies.vite=6.4.3'
+          npm pkg set 'pnpm.overrides.vite=6.4.3'
+          npm install --no-fund --no-audit
+
+      - name: Update vulnerable transitive dependencies
+        working-directory: Evidence Protector Web UI
+        run: npm audit fix --force --no-fund || true
+
+      - name: Upload refreshed manifests
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-dependency-refresh
+          path: |
+            Evidence Protector Web UI/package.json
+            Evidence Protector Web UI/package-lock.json
+          if-no-files-found: error
+
   e2e-ui-flows:
     name: UI E2E flows
     runs-on: ubuntu-latest
